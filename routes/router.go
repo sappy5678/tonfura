@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/docs"
 	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/middlewares"
 	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/models"
@@ -8,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"net/http"
 )
 
 func New() *gin.Engine {
@@ -24,6 +25,7 @@ func New() *gin.Engine {
 		PingRoute(v1)
 		AuthRoute(v1)
 		NoteRoute(v1, middlewares.JWTMiddleware())
+		CouponRoute(v1)
 	}
 
 	docs.SwaggerInfo.BasePath = v1.BasePath() // adds /v1 to swagger base path
