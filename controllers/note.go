@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/models"
 	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/services"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"net/http"
-	"strconv"
 )
 
 // CreateNewNote godoc
@@ -22,8 +23,8 @@ import (
 // @Router       /notes [post]
 // @Security     ApiKeyAuth
 func CreateNewNote(c *gin.Context) {
-	var requestBody models.NoteRequest
-	_ = c.ShouldBindBodyWith(&requestBody, binding.JSON)
+	var request models.NoteRequest
+	_ = c.ShouldBindBodyWith(&request, binding.JSON)
 
 	response := &models.Response{
 		StatusCode: http.StatusBadRequest,
@@ -37,7 +38,7 @@ func CreateNewNote(c *gin.Context) {
 		return
 	}
 
-	note, err := services.CreateNote(userId.(primitive.ObjectID), requestBody.Title, requestBody.Content)
+	note, err := services.CreateNote(userId.(primitive.ObjectID), request.Title, request.Content)
 	if err != nil {
 		response.Message = err.Error()
 		response.SendResponse(c)

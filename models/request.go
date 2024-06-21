@@ -65,11 +65,21 @@ func (a NoteRequest) Validate() error {
 	)
 }
 
-type CouponReserveRequest struct {
+type ReserveRequest struct {
 	UserID string `header:"userID"`
 }
 
-func (a CouponReserveRequest) Validate() error {
+func (a ReserveRequest) Validate() error {
+	return validation.ValidateStruct(&a,
+		validation.Field(&a.UserID, validation.Required, is.UUID),
+	)
+}
+
+type SnatchRequest struct {
+	UserID string `header:"userID"`
+}
+
+func (a SnatchRequest) Validate() error {
 	return validation.ValidateStruct(&a,
 		validation.Field(&a.UserID, validation.Required, is.UUID),
 	)

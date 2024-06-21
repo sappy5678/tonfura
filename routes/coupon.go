@@ -15,7 +15,11 @@ func CouponRoute(router *gin.RouterGroup) {
 			controllers.Reserve,
 		)
 
-		// TODO implement get coupon
+		coupon.POST(
+			"/snatch",
+			validators.SnatchValidator(),
+			controllers.Snatch,
+		)
 
 	}
 }

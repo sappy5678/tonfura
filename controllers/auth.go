@@ -1,14 +1,15 @@
 package controllers
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/models"
 	db "github.com/ebubekiryigit/golang-mongodb-rest-api-starter/models/db"
 	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/services"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"strings"
 )
 
 // Register godoc
@@ -22,8 +23,8 @@ import (
 // @Failure      400  {object}  models.Response
 // @Router       /auth/register [post]
 func Register(c *gin.Context) {
-	var requestBody models.RegisterRequest
-	_ = c.ShouldBindBodyWith(&requestBody, binding.JSON)
+	var request models.RegisterRequest
+	_ = c.ShouldBindBodyWith(&request, binding.JSON)
 
 	response := &models.Response{
 		StatusCode: http.StatusBadRequest,
@@ -31,7 +32,7 @@ func Register(c *gin.Context) {
 	}
 
 	// is email in use
-	err := services.CheckUserMail(requestBody.Email)
+	err := services.CheckUserMail(request.Email)
 	if err != nil {
 		response.Message = err.Error()
 		response.SendResponse(c)
@@ -39,8 +40,8 @@ func Register(c *gin.Context) {
 	}
 
 	// create user record
-	requestBody.Name = strings.TrimSpace(requestBody.Name)
-	user, err := services.CreateUser(requestBody.Name, requestBody.Email, requestBody.Password)
+	request.Name = strings.TrimSpace(request.Name)
+	user, err := services.CreateUser(request.Name, request.Email, request.Password)
 	if err != nil {
 		response.Message = err.Error()
 		response.SendResponse(c)
@@ -77,8 +78,8 @@ func Register(c *gin.Context) {
 // @Failure      400  {object}  models.Response
 // @Router       /auth/login [post]
 func Login(c *gin.Context) {
-	var requestBody models.LoginRequest
-	_ = c.ShouldBindBodyWith(&requestBody, binding.JSON)
+	var request models.LoginRequest
+	_ = c.ShouldBindBodyWith(&request, binding.JSON)
 
 	response := &models.Response{
 		StatusCode: http.StatusBadRequest,
@@ -86,7 +87,7 @@ func Login(c *gin.Context) {
 	}
 
 	// get user by email
-	user, err := services.FindUserByEmail(requestBody.Email)
+	user, err := services.FindUserByEmail(request.Email)
 	if err != nil {
 		response.Message = err.Error()
 		response.SendResponse(c)
@@ -94,7 +95,7 @@ func Login(c *gin.Context) {
 	}
 
 	// check hashed password
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(requestBody.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
 	if err != nil {
 		response.Message = "email and password don't match"
 		response.SendResponse(c)
@@ -131,8 +132,8 @@ func Login(c *gin.Context) {
 // @Failure      400  {object}  models.Response
 // @Router       /auth/refresh [post]
 func Refresh(c *gin.Context) {
-	var requestBody models.RefreshRequest
-	_ = c.ShouldBindBodyWith(&requestBody, binding.JSON)
+	var request models.RefreshRequest
+	_ = c.ShouldBindBodyWith(&request, binding.JSON)
 
 	response := &models.Response{
 		StatusCode: http.StatusBadRequest,
@@ -140,7 +141,7 @@ func Refresh(c *gin.Context) {
 	}
 
 	// check token validity
-	token, err := services.VerifyToken(requestBody.Token, db.TokenTypeRefresh)
+	token, err := services.VerifyToken(request.Token, db.TokenTypeRefresh)
 	if err != nil {
 		response.Message = err.Error()
 		response.SendResponse(c)
