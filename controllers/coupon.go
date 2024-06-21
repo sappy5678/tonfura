@@ -29,6 +29,7 @@ func Reserve(c *gin.Context) {
 
 	_, err := services.Reserve(request.UserID)
 	if err != nil {
+		response.Message = err.Error()
 		response.SendResponse(c)
 		return
 	}
@@ -60,6 +61,7 @@ func Snatch(c *gin.Context) {
 
 	_, err := services.Snatch(request.UserID)
 	if err != nil {
+		response.Message = err.Error()
 		response.SendResponse(c)
 		return
 	}

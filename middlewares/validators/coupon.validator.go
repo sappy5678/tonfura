@@ -10,10 +10,10 @@ import (
 func ReserveValidator() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var registerRequest models.ReserveRequest
-		_ = c.ShouldBindHeader(&registerRequest)
+		var request models.ReserveRequest
+		_ = c.ShouldBindHeader(&request)
 
-		if err := registerRequest.Validate(); err != nil {
+		if err := request.Validate(); err != nil {
 			models.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -25,10 +25,10 @@ func ReserveValidator() gin.HandlerFunc {
 func SnatchValidator() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var registerRequest models.SnatchRequest
-		_ = c.ShouldBindHeader(&registerRequest)
+		var request models.SnatchRequest
+		_ = c.ShouldBindHeader(&request)
 
-		if err := registerRequest.Validate(); err != nil {
+		if err := request.Validate(); err != nil {
 			models.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
