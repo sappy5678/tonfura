@@ -3,15 +3,16 @@ package services
 import (
 	"context"
 	"errors"
+	"log"
+	"sync"
+	"time"
+
 	models "github.com/ebubekiryigit/golang-mongodb-rest-api-starter/models/db"
 	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redis/v8"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"sync"
-	"time"
 )
 
 func InitMongoDB() {

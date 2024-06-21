@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	db "github.com/ebubekiryigit/golang-mongodb-rest-api-starter/models/db"
 	"github.com/google/uuid"
@@ -13,7 +15,14 @@ import (
 func Reserve(userID string) (*db.Coupon, error) {
 	couponID := uuid.NewString()
 	coupon := db.NewCoupon(couponID, userID, db.CouponStatusNotActive)
-	err := mgm.Coll(coupon).Create(coupon)
+	isReserved, err := checkAndSetReserveUser(userID)
+	if err != nil {
+		return nil, err
+	} else if isReserved {
+		err := mgm.Coll(coupon).First(bson.M{"userID": userID}, coupon)
+		return coupon, err
+	}
+	err = mgm.Coll(coupon).Create(coupon)
 	if err != nil {
 		return nil, err
 	}
@@ -35,4 +44,20 @@ func Snatch(userID string) (*db.Coupon, error) {
 	}
 
 	return coupon, nil
+}
+
+func getReserveKey(userID string) string {
+	return "coupon:bf:" + userID
+}
+
+func checkAndSetReserveUser(userID string) (bool, error) {
+	if !Config.UseRedis {
+		return false, fmt.Errorf("redis cannot used")
+	}
+
+	key := getReserveKey(userID)
+
+	ret := GetRedisDefaultClient().SetNX(context.TODO(), key, "1", 20*time.Minute)
+
+	return !ret.Val(), ret.Err()
 }

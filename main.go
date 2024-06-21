@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/routes"
-	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/services"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/routes"
+	"github.com/ebubekiryigit/golang-mongodb-rest-api-starter/services"
 )
 
 // @title GoLang Rest API Starter Doc
