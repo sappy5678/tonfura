@@ -14,10 +14,10 @@ import (
 // @Tags         coupon
 // @Accept       json
 // @Produce      json
-// @Param        req  body      models.CouponReserveRequest true "Register Request"
+// @Param		 userID	header	string						true "userID"
 // @Success      200  {object}  models.Response
 // @Failure      400  {object}  models.Response
-// @Router       /coupon/:couponID/reserve/:userID [post]
+// @Router       /coupon/reserve [post]
 func Reserve(c *gin.Context) {
 	var requestBody models.CouponReserveRequest
 	_ = c.ShouldBindHeader(&requestBody)
