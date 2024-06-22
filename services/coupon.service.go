@@ -45,12 +45,12 @@ func (c *couponConfig) isWinCoupon() bool {
 
 // We can get coupon config from DB, but in there we simplify the problem, hardcode in there.
 func getCouponConfig() couponConfig {
-	ReserveTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T00:55:00Z")
+	ReserveTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T22:55:00Z")
 	ReserveTimeMax, _ := time.Parse(time.RFC3339, "0001-01-01T22:59:00Z")
-	SnatchTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T00:00:00Z")
+	SnatchTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T23:00:00Z")
 	SnatchTimeMax, _ := time.Parse(time.RFC3339, "0001-01-01T23:01:00Z")
 	return couponConfig{
-		CouponProbability: 10000,
+		CouponProbability: 2000,
 
 		ReserveTimeMin: ReserveTimeMin,
 		ReserveTimeMax: ReserveTimeMax,
@@ -69,9 +69,11 @@ func Reserve(userID string) error {
 		return fmt.Errorf("not reserve time")
 	}
 
-	couponID := uuid.NewString()
-	coupon := db.NewCoupon(couponID, userID, db.CouponStatusNotActive)
+	couponID := ""
 	isWin := config.isWinCoupon()
+	if isWin {
+		couponID = uuid.NewString()
+	}
 	isReserved, err := checkAndSetReserveUser(userID, couponID)
 	if err != nil {
 		return err
@@ -81,6 +83,7 @@ func Reserve(userID string) error {
 		return nil
 	}
 
+	coupon := db.NewCoupon(couponID, userID, db.CouponStatusNotActive)
 	err = mgm.Coll(coupon).Create(coupon)
 	if err != nil {
 		removeReserveUserRecord(userID) // if mongo write fail, give users the opportunity to retry
