@@ -158,6 +158,7 @@ func checkAndSetReserveUser(userID string, couponID string) (bool, error) {
 
 	key := getReserveKey(userID)
 
+	// ttl should by config,in there we just hard code a acceptable system limit
 	ret := GetRedisDefaultClient().SetNX(context.Background(), key, couponID, 20*time.Minute)
 
 	return !ret.Val(), ret.Err()
