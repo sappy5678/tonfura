@@ -72,7 +72,7 @@ func Reserve(userID string) error {
 	couponID := uuid.NewString()
 	coupon := db.NewCoupon(couponID, userID, db.CouponStatusNotActive)
 	isWin := config.isWinCoupon()
-	isReserved, err := checkAndSetReserveUser(userID, isWin)
+	isReserved, err := checkAndSetReserveUser(userID, couponID)
 	if err != nil {
 		return err
 	} else if isReserved {
@@ -98,24 +98,31 @@ func Snatch(userID string) (*db.Coupon, error) {
 	if !config.isSnatchTime(t) {
 		return nil, fmt.Errorf("not snatch time")
 	}
-	if val, err := checkReserveUserIsWin(userID); err != nil {
+	couponID, err := checkReserveUserCouponID(userID)
+	if err != nil {
 		return nil, err
-	} else if !val {
+	} else if couponID == "" {
 		return nil, nil
 	}
 
 	coupon := &db.Coupon{}
 	opt := options.FindOneAndUpdate().SetReturnDocument(options.After)
 	res := mgm.Coll(coupon).FindOneAndUpdate(context.Background(),
-		bson.M{"userID": userID},
+		bson.M{"couponID": couponID, "status": db.CouponStatusNotActive},
 		bson.M{"$set": bson.M{"status": db.CouponStatusActive}, "$currentDate": bson.M{"updated_at": true}},
 		opt,
 	)
+
 	if res.Err() != nil {
+		// if coupon already be used or activated, get coupon info and return
+		err := mgm.Coll(coupon).First(bson.M{"couponID": couponID}, coupon)
+		if err == nil {
+			return coupon, nil
+		}
 		return nil, res.Err()
 	}
 
-	err := res.Decode(coupon)
+	err = res.Decode(coupon)
 	if err != nil {
 		return nil, err
 	}
@@ -139,33 +146,30 @@ func removeReserveUserRecord(userID string) error {
 	return ret.Err()
 }
 
-func checkAndSetReserveUser(userID string, isWin bool) (bool, error) {
+func checkAndSetReserveUser(userID string, couponID string) (bool, error) {
 	if !Config.UseRedis {
 		return false, fmt.Errorf("redis cannot used")
 	}
 
 	key := getReserveKey(userID)
 
-	ret := GetRedisDefaultClient().SetNX(context.Background(), key, isWin, 20*time.Minute)
+	ret := GetRedisDefaultClient().SetNX(context.Background(), key, couponID, 20*time.Minute)
 
 	return !ret.Val(), ret.Err()
 }
 
-func checkReserveUserIsWin(userID string) (bool, error) {
+func checkReserveUserCouponID(userID string) (string, error) {
 	if !Config.UseRedis {
-		return false, fmt.Errorf("redis cannot used")
+		return "", fmt.Errorf("redis cannot used")
 	}
 
 	key := getReserveKey(userID)
 
 	ret := GetRedisDefaultClient().Get(context.Background(), key)
 	if ret.Err() != nil {
-		return false, ret.Err()
+		return "", ret.Err()
 	}
-	val, err := ret.Bool()
-	if err != nil {
-		return false, err
-	}
+	val := ret.Val()
 
 	return val, nil
 }
