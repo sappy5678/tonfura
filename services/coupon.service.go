@@ -23,8 +23,10 @@ type couponConfig struct {
 }
 
 func (c *couponConfig) isBetweenTime(n time.Time, min time.Time, max time.Time) bool {
+	loc, _ := time.LoadLocation("Asia/Taipei")
+	n = n.In(loc)
 	h, m, s := n.Clock()
-	clockStr := fmt.Sprintf("0001-01-01T%02d:%02d:%02dZ", h, m, s)
+	clockStr := fmt.Sprintf("0001-01-01T%02d:%02d:%02d+08:00", h, m, s)
 	clock, err := time.Parse(time.RFC3339, clockStr)
 	if err != nil {
 		return false
@@ -45,10 +47,10 @@ func (c *couponConfig) isWinCoupon() bool {
 
 // We can get coupon config from DB, but in there we simplify the problem, hardcode in there.
 func getCouponConfig() couponConfig {
-	ReserveTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T22:55:00Z")
-	ReserveTimeMax, _ := time.Parse(time.RFC3339, "0001-01-01T22:59:00Z")
-	SnatchTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T23:00:00Z")
-	SnatchTimeMax, _ := time.Parse(time.RFC3339, "0001-01-01T23:01:00Z")
+	ReserveTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T22:55:00+08:00")
+	ReserveTimeMax, _ := time.Parse(time.RFC3339, "0001-01-01T22:59:00+08:00")
+	SnatchTimeMin, _ := time.Parse(time.RFC3339, "0001-01-01T23:00:00+08:00")
+	SnatchTimeMax, _ := time.Parse(time.RFC3339, "0001-01-01T23:01:00+08:00")
 	return couponConfig{
 		CouponProbability: 2000,
 

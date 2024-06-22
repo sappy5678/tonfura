@@ -14,10 +14,11 @@ const (
 )
 
 type Coupon struct {
-	mgm.DefaultModel `bson:",inline"`
-	CouponID         string       `json:"couponID" bson:"couponID"`
-	UserID           string       `json:"userID" bson:"userID"`
-	Status           CouponStatus `json:"status" bson:"status"`
+	mgm.IDField    `json:"-" bson:",inline"`
+	mgm.DateFields `bson:",inline"`
+	CouponID       string       `json:"couponID" bson:"couponID"`
+	UserID         string       `json:"userID" bson:"userID"`
+	Status         CouponStatus `json:"status" bson:"status"`
 }
 
 func NewCoupon(couponID string, userID string, status CouponStatus) *Coupon {
