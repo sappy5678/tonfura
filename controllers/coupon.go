@@ -27,14 +27,14 @@ func Reserve(c *gin.Context) {
 		Success:    false,
 	}
 
-	_, err := services.Reserve(request.UserID)
+	err := services.Reserve(request.UserID)
 	if err != nil {
 		response.Message = err.Error()
 		response.SendResponse(c)
 		return
 	}
 
-	response.StatusCode = http.StatusCreated
+	response.StatusCode = http.StatusOK
 	response.Success = true
 	response.Data = gin.H{}
 	response.SendResponse(c)
@@ -59,15 +59,19 @@ func Snatch(c *gin.Context) {
 		Success:    false,
 	}
 
-	_, err := services.Snatch(request.UserID)
+	coupon, err := services.Snatch(request.UserID)
 	if err != nil {
 		response.Message = err.Error()
 		response.SendResponse(c)
 		return
 	}
+	isWinCoupon := coupon != nil
 
-	response.StatusCode = http.StatusCreated
+	response.StatusCode = http.StatusOK
 	response.Success = true
-	response.Data = gin.H{}
+	response.Data = gin.H{
+		"isWinCoupon": isWinCoupon,
+		"coupon":      coupon,
+	}
 	response.SendResponse(c)
 }
