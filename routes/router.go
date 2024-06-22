@@ -22,9 +22,6 @@ func New() *gin.Engine {
 
 	v1 := r.Group("/v1")
 	{
-		PingRoute(v1)
-		AuthRoute(v1)
-		NoteRoute(v1, middlewares.JWTMiddleware())
 		CouponRoute(v1)
 	}
 
